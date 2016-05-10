@@ -1,0 +1,78 @@
+<!--
+Logback configuration that produces terse-ish console output but writes
+debug log to per-project ${project.build.directory}/build.log files.
+
+Project pom.xml file MUST have the following pluginManagement element,
+otherwise per-project build log files will not retained by the build.
+
+  <plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-clean-plugin</artifactId>
+    <version>2.6.1</version>
+    <executions>
+      <execution>
+        <id>default-clean</id>
+        <configuration>
+          <excludeDefaultDirectories>true</excludeDefaultDirectories>
+          <filesets combine.children="append">
+            <fileset>
+              <directory>${project.build.directory}</directory>
+              <excludes>
+                <exclude>build.log</exclude>
+              </excludes>
+              <useDefaultExcludes>false</useDefaultExcludes>
+            </fileset>
+            <fileset>
+              <directory>${project.build.outputDirectory}</directory>
+              <useDefaultExcludes>false</useDefaultExcludes>
+            </fileset>
+            <fileset>
+              <directory>${project.build.testOutputDirectory}</directory>
+              <useDefaultExcludes>false</useDefaultExcludes>
+            </fileset>
+            <fileset>
+              <directory>${project.reporting.outputDirectory}</directory>
+              <useDefaultExcludes>false</useDefaultExcludes>
+            </fileset>
+          </filesets>
+        </configuration>
+      </execution>
+    </executions>
+  </plugin>
+
+
+Console:
+  Build "global" messages according to -X log level
+  Project warn+ messages
+Project:
+  Project debug+ messages
+-->
+<configuration>
+  <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator"/>
+
+  <appender name="STDOUT" class="io.takari.maven.logback.ProjectConsoleAppender">
+  	<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+  		<level>${consoleLevel}</level>
+  	</filter>
+  	<filter class="io.takari.maven.logback.ProjectBuildLogFilter">
+  		<passthroughThreshold>WARN</passthroughThreshold>
+  		<onMatch>DENY</onMatch>
+  	</filter>
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} %.-1level %X{maven.project.artifactId} %logger{36} %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="PROJECT" class="io.takari.maven.logback.ProjectBuildLogAppender">
+    <pattern>%d{HH:mm:ss.SSS} %.-1level %logger{36} %msg%n</pattern>
+  </appender>
+
+  <logger name="Sisu" level="INFO"/>
+  <logger name="org.apache.maven.lifecycle.internal.builder.BuilderCommon" level="ERROR"/>
+  <logger name="org.eclipse.aether.internal.impl.WarnChecksumPolicy" level="ERROR"/>
+
+  <root level="debug">
+    <appender-ref ref="STDOUT" />
+    <appender-ref ref="PROJECT" />
+  </root>
+</configuration>

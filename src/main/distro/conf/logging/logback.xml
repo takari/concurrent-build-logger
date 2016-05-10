@@ -1,0 +1,25 @@
+<!--
+Project-related build log messages are buffered and flushed to the console at the 
+end of the project build. Messages from one project are always grouped together
+and never interleave with messages from other projects or build-global messages. 
+ -->
+<configuration>
+  <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator"/>
+
+  <appender name="STDOUT" class="io.takari.maven.logback.ProjectConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} %.-1level %X{maven.project.artifactId} %msg%n</pattern>
+    </encoder>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>${consoleLevel}</level>
+    </filter>
+  </appender>
+
+  <logger name="Sisu" level="INFO"/>
+  <logger name="org.apache.maven.lifecycle.internal.builder.BuilderCommon" level="ERROR"/>
+  <logger name="org.eclipse.aether.internal.impl.WarnChecksumPolicy" level="ERROR"/>
+
+  <root level="debug">
+    <appender-ref ref="STDOUT" />
+  </root>
+</configuration>

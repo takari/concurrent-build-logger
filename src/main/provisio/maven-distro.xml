@@ -1,0 +1,21 @@
+<assembly>
+
+  <artifactSet to="/">
+    <artifact id="org.apache.maven:apache-maven:tar.gz:bin:${mavenVersion}">
+      <unpack useRoot="false" excludes="lib/slf4j*,conf/logging/*" />
+    </artifact>
+  </artifactSet>
+
+  <artifactSet to="lib">
+    <artifact id="org.apache.maven:maven-embedder:${mavenVersion}" />
+
+    <artifactSet to="ext" ref="runtime.classpath" />
+  </artifactSet>
+
+  <fileSet to="/conf/logging">
+    <directory path="${basedir}/src/main/distro" />
+  </fileSet>
+
+  <archive name="maven-distro-${mavenVersion}-${project.version}.tar.gz" executable="**/bin/mvn,**/bin/mvnDebug,**/bin/mvnyjp" />
+
+</assembly>
