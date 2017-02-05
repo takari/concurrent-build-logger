@@ -11,7 +11,7 @@ public class LoggingMojo extends AbstractMojo {
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     System.out.println("System.out message");
-    System.err.println("System.out message");
+    System.err.println("System.err message");
 
     new Exception().printStackTrace();
   }
