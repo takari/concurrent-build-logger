@@ -92,7 +92,7 @@
         <groupId>io.takari.maven.plugins</groupId>
         <artifactId>takari-lifecycle-plugin</artifactId>
         <extensions>true</extensions>
-        <version>1.12.0</version>
+        <version>1.12.3</version>
         <configuration>
           <proc>none</proc>
           <sourceJar>true</sourceJar>
