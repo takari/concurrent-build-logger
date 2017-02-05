@@ -35,4 +35,3 @@ Uses log4j-over-slf4j and jcl-over-slf4j to capture and route log4j and commons 
 ## Known issues
 
 * no automated tests
-* `maven-release-plugin` hangs during `relase:prepare release:perform` invocation

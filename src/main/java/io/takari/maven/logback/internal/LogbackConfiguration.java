@@ -18,7 +18,6 @@ import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.classic.util.ContextInitializer;
 import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.util.StatusPrinter;
-import io.takari.maven.logging.internal.SLF4JPrintStream;
 
 public class LogbackConfiguration extends BaseSlf4jConfiguration {
 
@@ -29,10 +28,6 @@ public class LogbackConfiguration extends BaseSlf4jConfiguration {
     // see http://www.slf4j.org/legacy.html#jul-to-slf4j
     SLF4JBridgeHandler.removeHandlersForRootLogger(); // suppress annoying stderr messages
     SLF4JBridgeHandler.install();
-
-    // funnel System out/err message to slf4j
-    System.setOut(new SLF4JPrintStream(System.out, false));
-    System.setErr(new SLF4JPrintStream(System.err, true));
   }
 
   @Override
@@ -54,8 +49,6 @@ public class LogbackConfiguration extends BaseSlf4jConfiguration {
 
   @Override
   public void activate() {
-    // this is called too late to install System out/err bridge
-
     LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
     lc.reset();
     lc.putProperty("consoleLevel", consoleLevel.levelStr);
