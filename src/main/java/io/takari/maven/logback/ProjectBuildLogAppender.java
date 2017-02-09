@@ -196,12 +196,6 @@ public class ProjectBuildLogAppender extends AppenderBase<ILoggingEvent>
   }
 
   @Override
-  public void onSessionFinish(MavenSession session) {}
-
-  @Override
-  public void onProjectBuildStart(MavenProject project) {}
-
-  @Override
   public void onProjectBuildFinish(MavenProject project) {
     appenderTracker.endOfLife(project.getId());
     // TODO actually stop and remove the appender here

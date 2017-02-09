@@ -104,15 +104,9 @@ public class ProjectConsoleAppender extends ConsoleAppender<ILoggingEvent>
   }
 
   @Override
-  public void onSessionStart(MavenSession session) {}
-
-  @Override
   public void onSessionFinish(MavenSession session) {
     flushAll();
   }
-
-  @Override
-  public void onProjectBuildStart(MavenProject project) {}
 
   @Override
   public void onProjectBuildFinish(MavenProject project) {

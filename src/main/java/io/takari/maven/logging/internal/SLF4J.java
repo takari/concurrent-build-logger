@@ -8,11 +8,12 @@
 package io.takari.maven.logging.internal;
 
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.lifecycle.Lifecycle;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 import org.slf4j.MDC;
@@ -21,13 +22,16 @@ public final class SLF4J {
   private SLF4J() {}
 
   public interface LifecycleListener {
-    void onSessionStart(MavenSession session);
+    default void onSessionStart(MavenSession session) {}
 
-    void onSessionFinish(MavenSession session);
+    default void onSessionFinish(MavenSession session) {}
 
-    void onProjectBuildStart(MavenProject project);
+    default void onProjectBuildStart(MavenProject project) {}
 
-    void onProjectBuildFinish(MavenProject project);
+    default void onProjectBuildFinish(MavenProject project) {}
+
+    default void onMojoExecutionStart(MavenProject project, Lifecycle lifecycle,
+        MojoExecution execution) {}
   }
 
   public static final String KEY_PROJECT_ID = "maven.project.id";
@@ -92,60 +96,49 @@ public final class SLF4J {
     MDC.remove(KEY_PROJECT_LOGDIR);
   }
 
-  private static List<LifecycleListener> listeners = new ArrayList<>();
+  private static List<LifecycleListener> listeners = new CopyOnWriteArrayList<>();
 
   public static void addListener(LifecycleListener listener) {
-    synchronized (listeners) {
-      listeners.add(listener);
-    }
+    listeners.add(listener);
   }
 
   public static void removeListener(LifecycleListener listener) {
-    synchronized (listeners) {
-      Iterator<LifecycleListener> iterator = listeners.iterator();
-      while (iterator.hasNext()) {
-        if (iterator.next() == listener) {
-          iterator.remove();
-        }
+    Iterator<LifecycleListener> iterator = listeners.iterator();
+    while (iterator.hasNext()) {
+      if (iterator.next() == listener) {
+        iterator.remove();
       }
     }
   }
 
   static void notifySessionStart(MavenSession session) {
-    synchronized (listeners) {
-      for (LifecycleListener listener : listeners) {
-        listener.onSessionStart(session);
-      }
+    for (LifecycleListener listener : listeners) {
+      listener.onSessionStart(session);
     }
   }
 
   static void notifySessionFinish(MavenSession session) {
-    synchronized (listeners) {
-      for (LifecycleListener listener : listeners) {
-        listener.onSessionFinish(session);
-      }
+    for (LifecycleListener listener : listeners) {
+      listener.onSessionFinish(session);
     }
   }
 
   static void notifyProjectBuildStart(MavenProject project) {
     putMDC(project);
-    synchronized (listeners) {
-      for (LifecycleListener listener : listeners) {
-        listener.onProjectBuildStart(project);
-      }
+    for (LifecycleListener listener : listeners) {
+      listener.onProjectBuildStart(project);
     }
   }
 
   static void notifyProjectBuildFinish(MavenProject project) {
-    synchronized (listeners) {
-      for (LifecycleListener listener : listeners) {
-        listener.onProjectBuildFinish(project);
-      }
+    for (LifecycleListener listener : listeners) {
+      listener.onProjectBuildFinish(project);
     }
     removeMDC(project);
   }
 
-  static void notifyMojoExecutionStart(MojoExecution execution) {
+  static void notifyMojoExecutionStart(MavenProject project, Lifecycle lifecycle,
+      MojoExecution execution) {
     StringBuilder id = new StringBuilder();
     id.append(execution.getGroupId());
     id.append(':');
@@ -161,9 +154,12 @@ public final class SLF4J {
     MDC.put(KEY_MOJO_ARTIFACTID, execution.getArtifactId());
     MDC.put(KEY_MOJO_VERSION, execution.getVersion());
     MDC.put(KEY_MOJO_GOAL, execution.getGoal());
+    for (LifecycleListener listener : listeners) {
+      listener.onMojoExecutionStart(project, lifecycle, execution);
+    }
   }
 
-  static void notifyMojoExecutionFinish(MojoExecution execution) {
+  static void notifyMojoExecutionFinish(MavenProject project, MojoExecution execution) {
     MDC.remove(KEY_MOJO_ID);
     MDC.remove(KEY_MOJO_GROUPID);
     MDC.remove(KEY_MOJO_ARTIFACTID);
