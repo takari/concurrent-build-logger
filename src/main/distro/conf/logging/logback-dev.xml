@@ -1,0 +1,39 @@
+<configuration>
+  <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator" />
+
+  <!--
+    | terse console log
+    | * info and more severe overall build messages
+    | * individual project error messages
+    -->
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>INFO</level>
+    </filter>
+    <filter class="io.takari.maven.logback.ProjectBuildLogFilter">
+      <passthroughThreshold>ERROR</passthroughThreshold>
+      <onMatch>DENY</onMatch>
+    </filter>
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} %.-1level %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss" />
+
+  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+    <file>maven-${bySecond}.log</file>
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} %.-1level [%X{maven.project.artifactId:--}@%t] %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <logger name="Sisu" level="INFO" />
+  <logger name="org.apache.maven.lifecycle.internal.builder.BuilderCommon" level="ERROR" />
+  <logger name="org.eclipse.aether.internal.impl.WarnChecksumPolicy" level="ERROR" />
+
+  <root level="${consoleLevel:-info}">
+    <appender-ref ref="STDOUT" />
+    <appender-ref ref="FILE" />
+  </root>
+</configuration>
