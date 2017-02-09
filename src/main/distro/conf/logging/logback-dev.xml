@@ -19,10 +19,16 @@
     </encoder>
   </appender>
 
-  <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss" />
-
-  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-    <file>maven-${bySecond}.log</file>
+  <!--
+    | write build log to maven.log file and keep last two logs
+    | log entries include project artifactId and thread names
+   -->
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>maven.log</file>
+    <rollingPolicy class="io.takari.maven.logback.BuildRollingPolicy">
+      <fileNamePattern>maven-%i.log</fileNamePattern>
+      <maxIndex>2</maxIndex>
+    </rollingPolicy>
     <encoder>
       <pattern>%d{HH:mm:ss.SSS} %.-1level [%X{maven.project.artifactId:--}@%t] %msg%n</pattern>
     </encoder>
