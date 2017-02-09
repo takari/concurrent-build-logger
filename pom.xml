@@ -96,6 +96,7 @@
         <configuration>
           <proc>none</proc>
           <sourceJar>true</sourceJar>
+          <source>1.8</source>
         </configuration>
       </plugin>
     </plugins>
