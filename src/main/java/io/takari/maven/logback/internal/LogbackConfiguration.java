@@ -46,8 +46,6 @@ public class LogbackConfiguration extends AbstractMavenLifecycleParticipant {
 
     if (classifier != null || loglevel != MavenExecutionRequest.LOGGING_LEVEL_INFO) {
       LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-      lc.reset();
-      lc.putProperty("consoleLevel", toLogbackLevel(loglevel).levelStr);
 
       URL url;
       if (classifier == null) {
@@ -57,10 +55,15 @@ public class LogbackConfiguration extends AbstractMavenLifecycleParticipant {
         String resourceName = "logback-" + classifier + ".xml";
         url = getClass().getClassLoader().getResource(resourceName.toString());
         if (url == null) {
-          throw new MavenExecutionException("Invalid -D" + PROP_LOGGING + "=" + classifier,
-              (Throwable) null);
+          String msg =
+              String.format("Invalid -D%s=%s property value, %s configuration file is not found",
+                  PROP_LOGGING, classifier, resourceName);
+          throw new MavenExecutionException(msg, (Throwable) null);
         }
       }
+
+      lc.reset();
+      lc.putProperty("consoleLevel", toLogbackLevel(loglevel).levelStr);
 
       JoranConfigurator configurator = new JoranConfigurator();
       configurator.setContext(lc);
