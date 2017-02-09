@@ -7,21 +7,20 @@
  */
 package io.takari.maven.logback.internal;
 
-import java.net.URL;
-
 import org.apache.maven.cli.logging.BaseSlf4jConfiguration;
-import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.classic.util.ContextInitializer;
-import ch.qos.logback.core.joran.spi.JoranException;
-import ch.qos.logback.core.util.StatusPrinter;
-
 public class LogbackConfiguration extends BaseSlf4jConfiguration {
-
-  private ch.qos.logback.classic.Level consoleLevel = ch.qos.logback.classic.Level.INFO;
+  /*
+   * Maven Slf4jConfiguration API does not provide access to required execution request parameters
+   * (interactive/batch mode, system anduser properties, log file, etc). All logging configuration
+   * is done in SysoutCapturer.
+   * 
+   * TODO rename LogbackConfiguration DummyLogbackConfiguration and SysoutCapturer to
+   * LogbackConfiguration
+   * 
+   * TODO extend LogbackConfiguration API to support our usecase
+   */
 
   public LogbackConfiguration() {
     // funnel all java.util.logging messages to slf4j
@@ -31,45 +30,8 @@ public class LogbackConfiguration extends BaseSlf4jConfiguration {
   }
 
   @Override
-  public void setRootLoggerLevel(Level level) {
-    switch (level) {
-      case DEBUG:
-        this.consoleLevel = ch.qos.logback.classic.Level.DEBUG;
-        break;
-
-      case INFO:
-        this.consoleLevel = ch.qos.logback.classic.Level.INFO;
-        break;
-
-      default:
-        this.consoleLevel = ch.qos.logback.classic.Level.ERROR;
-        break;
-    }
-  }
+  public void setRootLoggerLevel(Level level) {}
 
   @Override
-  public void activate() {
-    LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-    lc.reset();
-    lc.putProperty("consoleLevel", consoleLevel.levelStr);
-
-    String resourceName = "logback.xml";
-    if (ch.qos.logback.classic.Level.DEBUG.isGreaterOrEqual(consoleLevel)) {
-      resourceName = "logback-debug.xml";
-    }
-    URL url = getClass().getClassLoader().getResource(resourceName);
-    if (url == null) {
-      ContextInitializer ci = new ContextInitializer(lc);
-      url = ci.findURLOfDefaultConfigurationFile(true);
-    }
-
-    JoranConfigurator configurator = new JoranConfigurator();
-    configurator.setContext(lc);
-    try {
-      configurator.doConfigure(url);
-    } catch (JoranException e) {
-      // StatusPrinter will handle this, see logback documentation for details
-    }
-    StatusPrinter.printInCaseOfErrorsOrWarnings(lc);
-  }
+  public void activate() {}
 }
