@@ -9,6 +9,21 @@
     <plugins>
       <plugin>
         <groupId>maven-logback-its</groupId>
+        <artifactId>plugin-slf4j</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <executions>
+          <execution>
+            <id>clean-log</id>
+            <goals>
+              <goal>log</goal>
+            </goals>
+            <phase>validate</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>maven-logback-its</groupId>
         <artifactId>plugin-sysout</artifactId>
         <version>0.0.1-SNAPSHOT</version>
         <executions>
