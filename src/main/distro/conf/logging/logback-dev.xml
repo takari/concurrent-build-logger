@@ -1,10 +1,14 @@
+<!--
+  | Local developer build logging configuration. 
+  | * console log shows overall info+ build messages and project errors
+  | * overall build.log file includes all build log messages
+  | * project-specific build.log files include corresponding project build log messages  
+ -->
 <configuration>
   <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator" />
 
   <!--
-    | terse console log
-    | * info and more severe overall build messages
-    | * individual project error messages
+    | terse console log, info+ overall build messages, error+ project messages
     -->
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -20,22 +24,19 @@
   </appender>
 
   <!--
-    | write build log to build.log file and keep last two logs
+    | write overall build log messages to ${cwd}/build.log file
     | log entries include project artifactId and thread names
    -->
-  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
     <file>build.log</file>
-    <rollingPolicy class="io.takari.maven.logback.BuildRollingPolicy">
-      <fileNamePattern>build-%i.log</fileNamePattern>
-      <maxIndex>2</maxIndex>
-    </rollingPolicy>
+    <append>false</append>
     <encoder>
       <pattern>%d{HH:mm:ss.SSS} %.-1level [%X{maven.project.artifactId:--}@%t] %msg%n</pattern>
     </encoder>
   </appender>
 
   <!--
-    | write project-specific build log to ${project.build.directory}/build.log file
+    | write project-specific build log messages to ${project.build.directory}/build.log files
    -->
   <appender name="PROJECT" class="io.takari.maven.logback.ProjectBuildLogAppender">
     <file>build.log</file>
