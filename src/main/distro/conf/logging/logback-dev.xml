@@ -20,18 +20,26 @@
   </appender>
 
   <!--
-    | write build log to maven.log file and keep last two logs
+    | write build log to build.log file and keep last two logs
     | log entries include project artifactId and thread names
    -->
   <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>maven.log</file>
+    <file>build.log</file>
     <rollingPolicy class="io.takari.maven.logback.BuildRollingPolicy">
-      <fileNamePattern>maven-%i.log</fileNamePattern>
+      <fileNamePattern>build-%i.log</fileNamePattern>
       <maxIndex>2</maxIndex>
     </rollingPolicy>
     <encoder>
       <pattern>%d{HH:mm:ss.SSS} %.-1level [%X{maven.project.artifactId:--}@%t] %msg%n</pattern>
     </encoder>
+  </appender>
+
+  <!--
+    | write project-specific build log to ${project.build.directory}/build.log file
+   -->
+  <appender name="PROJECT" class="io.takari.maven.logback.ProjectBuildLogAppender">
+    <file>build.log</file>
+    <pattern>%d{HH:mm:ss.SSS} %.-1level %msg%n</pattern>
   </appender>
 
   <logger name="Sisu" level="INFO" />
@@ -41,5 +49,6 @@
   <root level="${consoleLevel:-info}">
     <appender-ref ref="STDOUT" />
     <appender-ref ref="FILE" />
+    <appender-ref ref="PROJECT" />
   </root>
 </configuration>
