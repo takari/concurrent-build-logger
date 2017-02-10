@@ -10,7 +10,7 @@
   <!--
     | terse console log, info+ overall build messages, error+ project messages
     -->
-  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+  <appender name="STDOUT" class="io.takari.maven.logback.ConsoleAppender">
     <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
       <level>INFO</level>
     </filter>
@@ -44,6 +44,8 @@
   </appender>
 
   <logger name="Sisu" level="INFO" />
+
+  <!-- suppress annoying @threadSafe and checksum failure warning messages -->
   <logger name="org.apache.maven.lifecycle.internal.builder.BuilderCommon" level="ERROR" />
   <logger name="org.eclipse.aether.internal.impl.WarnChecksumPolicy" level="ERROR" />
 
