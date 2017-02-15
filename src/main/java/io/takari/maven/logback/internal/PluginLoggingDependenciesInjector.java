@@ -38,18 +38,59 @@ public class PluginLoggingDependenciesInjector implements ClassRealmManagerDeleg
         iter.remove();
         request.getForeignImports().put("ch.qos.logback", getClass().getClassLoader());
       }
+      // jul->slf4j bridge
+      else if ("org.slf4j".equals(entry.getGroupId())
+          && "jul-to-slf4j".equals(entry.getArtifactId())) {
+        iter.remove();
+      }
+      // slf4j->bridge bridge
+      else if ("org.slf4j".equals(entry.getGroupId())
+          && "slf4j-jdk14".equals(entry.getArtifactId())) {
+        iter.remove();
+      }
+      // slf4j-nop bridge
+      else if ("org.slf4j".equals(entry.getGroupId())
+          && "slf4j-nop".equals(entry.getArtifactId())) {
+        iter.remove();
+      }
+      // slf4j-simple bridge
+      else if ("org.slf4j".equals(entry.getGroupId())
+          && "slf4j-simple".equals(entry.getArtifactId())) {
+        iter.remove();
+      }
       // log4j 1.x
-      else if ("log4j".equals(entry.getGroupId()) && "log4j".equals(entry.getArtifactId())) {
+      else if (isLog4j1x(entry)) {
         iter.remove();
         request.getForeignImports().put("org.apache.log4j", getClass().getClassLoader());
       }
       // commons-logging
-      else if ("commons-logging".equals(entry.getGroupId())
-          && "commons-logging".equals(entry.getArtifactId())) {
+      else if (isCommonsLogging(entry)) {
         iter.remove();
         request.getForeignImports().put("org.apache.commons.logging", getClass().getClassLoader());
       }
     }
+  }
+
+  private boolean isLog4j1x(ClassRealmConstituent entry) {
+    if ("log4j".equals(entry.getGroupId()) && "log4j".equals(entry.getArtifactId())) {
+      return true;
+    }
+    if ("org.slf4j".equals(entry.getGroupId())
+        && "log4j-over-slf4j".equals(entry.getArtifactId())) {
+      return true;
+    }
+    return false;
+  }
+
+  private boolean isCommonsLogging(ClassRealmConstituent entry) {
+    if ("commons-logging".equals(entry.getGroupId())
+        && "commons-logging".equals(entry.getArtifactId())) {
+      return true;
+    }
+    if ("org.slf4j".equals(entry.getGroupId()) && "jcl-over-slf4j".equals(entry.getArtifactId())) {
+      return true;
+    }
+    return false;
   }
 
 }
