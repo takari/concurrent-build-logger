@@ -27,9 +27,12 @@
     | write overall build log messages to ${cwd}/build.log file
     | log entries include project artifactId and thread names
    -->
-  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <file>build.log</file>
-    <append>false</append>
+    <rollingPolicy class="io.takari.maven.logback.BuildRollingPolicy">
+      <fileNamePattern>build-%i.log</fileNamePattern>
+      <maxIndex>2</maxIndex>
+    </rollingPolicy>
     <encoder>
       <pattern>%d{HH:mm:ss.SSS} %.-1level [%X{maven.project.artifactId:--}@%t] %msg%n</pattern>
     </encoder>
