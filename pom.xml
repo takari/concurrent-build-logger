@@ -17,8 +17,8 @@
 
   <properties>
     <mavenVersion>3.3.9</mavenVersion>
-    <slf4jVersion>1.7.22</slf4jVersion>
-    <logbackVersion>1.2.0</logbackVersion>
+    <slf4jVersion>1.7.24</slf4jVersion>
+    <logbackVersion>1.2.1</logbackVersion>
   </properties>
 
   <dependencies>
