@@ -1,36 +1,27 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <groupId>maven-logback-its</groupId>
-  <artifactId>plugin-log4j-1x</artifactId>
+  <artifactId>aggregator</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <packaging>takari-maven-plugin</packaging>
+  <packaging>pom</packaging>
 
   <properties>
     <mavenVersion>3.3.3</mavenVersion>
     <mavenPluginPluginVersion>3.4</mavenPluginPluginVersion>
   </properties>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-plugin-api</artifactId>
-      <version>${mavenVersion}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.plugin-tools</groupId>
-      <artifactId>maven-plugin-annotations</artifactId>
-      <version>${mavenPluginPluginVersion}</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.11</version>
-    </dependency>
-  </dependencies>
+  <modules>
+    <module>plugin-jcl</module>
+    <module>plugin-jul</module>
+    <module>plugin-log4j-1x</module>
+    <module>plugin-logback</module>
+    <module>plugin-slf4j</module>
+    <module>plugin-slf4j-bridges</module>
+    <module>plugin-sysout</module>
+    <module>test-project</module>
+  </modules>
 
   <build>
     <plugins>
@@ -39,7 +30,11 @@
         <artifactId>takari-lifecycle-plugin</artifactId>
         <extensions>true</extensions>
         <version>1.12.3</version>
+        <configuration>
+          <proc>none</proc>
+        </configuration>
       </plugin>
     </plugins>
   </build>
+
 </project>

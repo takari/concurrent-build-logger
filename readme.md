@@ -14,7 +14,7 @@
 
 To build logging extensions and maven distribution
 
-    mvn clean package -Pmaven-distro
+    mvn clean integration-test -Pmaven-distro
 
 Maven distribution with concurrent logging is created under target/ folder as `maven-distro-${mavenVersion}-${project.version}` archive.
 
@@ -56,4 +56,4 @@ Uses log4j-over-slf4j and jcl-over-slf4j to capture and route log4j and commons 
 
 ## Known issues
 
-* no automated tests
+* none at this point
