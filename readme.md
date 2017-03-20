@@ -52,7 +52,7 @@ Uses [jul-to-slf4j](http://www.slf4j.org/legacy.html#jul-to-slf4j) to capture  J
 
 ### log4j 1.x and commons-logging
 
-Uses log4j-over-slf4j and jcl-over-slf4j to capture and route log4j and commons logging log messages to SLF4j. Replaces plugin dependencies with corresponding bridge libraries as part of plugin classrealm setup. 
+Uses [log4j-over-slf4j](https://www.slf4j.org/legacy.html#log4j-over-slf4j) and [jcl-over-slf4j](https://www.slf4j.org/legacy.html#jclOverSLF4J) to capture and route log4j and commons logging log messages to SLF4j. Replaces plugin dependencies with corresponding bridge libraries as part of plugin classrealm setup. 
 
 ## Known issues
 
