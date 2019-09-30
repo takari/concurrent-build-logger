@@ -12,8 +12,6 @@
 
 ## Build and installation
 
-The project currently does not build under Java 11.
-
 To build logging extensions and maven distribution
 
     mvn clean integration-test -Pmaven-distro
