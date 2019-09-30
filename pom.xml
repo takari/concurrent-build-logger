@@ -26,7 +26,7 @@
     <mavenVersion>3.6.2</mavenVersion>
     <slf4jVersion>1.7.25</slf4jVersion>
     <logbackVersion>1.2.3</logbackVersion>
-    <pluginTestingVersion>2.9.1</pluginTestingVersion>
+    <pluginTestingVersion>2.9.2</pluginTestingVersion>
 
     <takari.javaSourceVersion>1.8</takari.javaSourceVersion>
     <takari.transitiveDependencyReference>ignore</takari.transitiveDependencyReference>
