@@ -22,7 +22,7 @@
   <packaging>takari-maven-component</packaging>
 
   <properties>
-    <mavenVersion>3.3.9</mavenVersion>
+    <mavenVersion>3.6.2</mavenVersion>
     <slf4jVersion>1.7.24</slf4jVersion>
     <logbackVersion>1.2.1</logbackVersion>
     <pluginTestingVersion>2.9.1</pluginTestingVersion>
@@ -118,7 +118,7 @@
           <plugin>
             <groupId>io.takari.maven.plugins</groupId>
             <artifactId>provisio-maven-plugin</artifactId>
-            <version>0.1.16</version>
+            <version>0.1.56</version>
             <executions>
               <execution>
                 <id>maven-distro</id>
