@@ -13,23 +13,25 @@
   <parent>
     <groupId>io.takari</groupId>
     <artifactId>takari</artifactId>
-    <version>25</version>
+    <version>28</version>
   </parent>
 
   <groupId>io.takari.maven</groupId>
   <artifactId>concurrent-build-logger</artifactId>
-  <version>0.2.0-SNAPSHOT</version>
+  <version>${revision}</version>
   <packaging>takari-maven-component</packaging>
 
   <properties>
+    <revision>0.2.0-SNAPSHOT</revision>
     <mavenVersion>3.6.2</mavenVersion>
-    <slf4jVersion>1.7.24</slf4jVersion>
-    <logbackVersion>1.2.1</logbackVersion>
+    <slf4jVersion>1.7.25</slf4jVersion>
+    <logbackVersion>1.2.3</logbackVersion>
     <pluginTestingVersion>2.9.1</pluginTestingVersion>
 
     <takari.javaSourceVersion>1.8</takari.javaSourceVersion>
     <takari.transitiveDependencyReference>ignore</takari.transitiveDependencyReference>
     <takari.privatePackageReference>ignore</takari.privatePackageReference>
+
   </properties>
 
   <dependencies>
