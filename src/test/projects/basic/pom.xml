@@ -8,8 +8,8 @@
   <packaging>pom</packaging>
 
   <properties>
-    <mavenVersion>3.3.3</mavenVersion>
-    <mavenPluginPluginVersion>3.4</mavenPluginPluginVersion>
+    <mavenVersion>3.6.2</mavenVersion>
+    <mavenPluginPluginVersion>3.6.0</mavenPluginPluginVersion>
   </properties>
 
   <modules>
@@ -29,7 +29,7 @@
         <groupId>io.takari.maven.plugins</groupId>
         <artifactId>takari-lifecycle-plugin</artifactId>
         <extensions>true</extensions>
-        <version>1.12.3</version>
+        <version>1.13.7</version>
         <configuration>
           <proc>none</proc>
         </configuration>
