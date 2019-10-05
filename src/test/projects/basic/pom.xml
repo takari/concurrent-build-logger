@@ -8,7 +8,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <mavenVersion>3.6.2</mavenVersion>
+    <mavenVersion>3.3.3</mavenVersion>
     <mavenPluginPluginVersion>3.6.0</mavenPluginPluginVersion>
   </properties>
 
