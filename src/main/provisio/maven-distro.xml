@@ -2,7 +2,7 @@
 
   <artifactSet to="/">
     <artifact id="org.apache.maven:apache-maven:tar.gz:bin:${mavenVersion}">
-      <unpack useRoot="false" excludes="lib/slf4j*,lib/maven-slf4j-provider*,,conf/logging/*" />
+      <unpack useRoot="false" excludes="lib/slf4j*,lib/maven-slf4j-provider*,lib/jcl-over-slf4j*,conf/logging/*" />
     </artifact>
   </artifactSet>
 
