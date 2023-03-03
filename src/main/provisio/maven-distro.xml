@@ -12,7 +12,7 @@
     <artifactSet to="ext" ref="runtime.classpath" />
   </artifactSet>
 
-  <fileSet to="/conf/logging">
+  <fileSet to="/">
     <directory path="${basedir}/src/main/distro" />
   </fileSet>
 

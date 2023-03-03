@@ -1,5 +1,14 @@
 .classpath
 .project
-.settings
-/target/
+.settings/
+.idea/
+*.iml
+*.iws
 .DS_Store
+log/
+target/
+bin/
+.cache
+release.properties
+pom.xml.releaseBackup
+release.sh
