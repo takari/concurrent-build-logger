@@ -13,7 +13,7 @@
   <parent>
     <groupId>io.takari</groupId>
     <artifactId>takari</artifactId>
-    <version>25</version>
+    <version>50</version>
   </parent>
 
   <groupId>io.takari.maven</groupId>
@@ -22,21 +22,42 @@
   <packaging>takari-maven-component</packaging>
 
   <properties>
-    <mavenVersion>3.3.9</mavenVersion>
-    <slf4jVersion>1.7.24</slf4jVersion>
-    <logbackVersion>1.2.1</logbackVersion>
-    <pluginTestingVersion>2.9.1</pluginTestingVersion>
+    <mavenVersion>3.8.7</mavenVersion>
+    <slf4jVersion>1.7.36</slf4jVersion>
+    <logbackVersion>1.2.11</logbackVersion>
+    <pluginTestingVersion>3.0.1</pluginTestingVersion>
 
     <takari.javaSourceVersion>1.8</takari.javaSourceVersion>
     <takari.transitiveDependencyReference>ignore</takari.transitiveDependencyReference>
     <takari.privatePackageReference>ignore</takari.privatePackageReference>
   </properties>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-core</artifactId>
+        <version>${mavenVersion}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-embedder</artifactId>
+        <version>${mavenVersion}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4jVersion}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-core</artifactId>
-      <version>${mavenVersion}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -49,7 +70,6 @@
       <artifactId>slf4j-api</artifactId>
       <scope>provided</scope>
     </dependency>
-
 
     <dependency>
       <groupId>ch.qos.logback</groupId>
@@ -76,7 +96,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.12</version>
+      <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -94,31 +114,15 @@
     </dependency>
   </dependencies>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.apache.maven</groupId>
-        <artifactId>maven-embedder</artifactId>
-        <version>${mavenVersion}</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>${slf4jVersion}</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
   <profiles>
     <profile>
       <id>maven-distro</id>
       <build>
         <plugins>
           <plugin>
-            <groupId>io.takari.maven.plugins</groupId>
+            <groupId>ca.vanzyl.provisio.maven.plugins</groupId>
             <artifactId>provisio-maven-plugin</artifactId>
-            <version>0.1.16</version>
+            <version>1.0.19</version>
             <executions>
               <execution>
                 <id>maven-distro</id>
