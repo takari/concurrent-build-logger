@@ -17,7 +17,7 @@
 
   <groupId>io.takari.maven</groupId>
   <artifactId>concurrent-build-logger</artifactId>
-  <version>0.2.0</version>
+  <version>0.2.1-SNAPSHOT</version>
   <packaging>takari-maven-component</packaging>
 
   <properties>
@@ -155,8 +155,4 @@
       </build>
     </profile>
   </profiles>
-
-  <scm>
-    <tag>concurrent-build-logger-0.2.0</tag>
-  </scm>
 </project>
