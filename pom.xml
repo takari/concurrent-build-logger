@@ -21,7 +21,7 @@
   <packaging>takari-maven-component</packaging>
 
   <properties>
-    <mavenVersion>3.8.7</mavenVersion>
+    <mavenVersion>3.9.6</mavenVersion>
     <slf4jVersion>1.7.36</slf4jVersion>
     <logbackVersion>1.2.11</logbackVersion>
     <pluginTestingVersion>3.0.1</pluginTestingVersion>
