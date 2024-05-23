@@ -7,20 +7,17 @@
  */
 package io.takari.maven.logback;
 
-
-import org.apache.maven.execution.MavenSession;
-import org.apache.maven.project.MavenProject;
-
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.LoggingEventVO;
+import ch.qos.logback.core.ConsoleAppender;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.classic.spi.LoggingEventVO;
-import ch.qos.logback.core.ConsoleAppender;
 import io.takari.maven.logging.internal.SLF4J;
 import io.takari.maven.logging.internal.SLF4JPrintStream;
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.project.MavenProject;
 
 /**
  * Maven-specific console appender that buffers individual project build log messages until the end
@@ -28,88 +25,87 @@ import io.takari.maven.logging.internal.SLF4JPrintStream;
  * together. This is useful when using multi threaded build, where several projects are built
  * concurrently.
  */
-public class ProjectConsoleAppender extends ConsoleAppender<ILoggingEvent>
-    implements SLF4J.LifecycleListener {
+public class ProjectConsoleAppender extends ConsoleAppender<ILoggingEvent> implements SLF4J.LifecycleListener {
 
-  private final Multimap<String, ILoggingEvent> queue = ArrayListMultimap.create();
+    private final Multimap<String, ILoggingEvent> queue = ArrayListMultimap.create();
 
-  @Override
-  protected void subAppend(ILoggingEvent event) {
-    String projectId = event.getMDCPropertyMap().get(SLF4J.KEY_PROJECT_ID);
-    if (projectId != null) {
-      synchronized (queue) {
-        queue.put(projectId, LoggingEventVO.build(event));
-      }
-    } else {
-      privilegedAppend(event);
-    }
-  }
-
-  @Override
-  public void start() {
-    super.start();
-
-    SLF4J.addListener(this);
-  }
-
-  @Override
-  public void stop() {
-    SLF4J.removeListener(this);
-
-    flushAll();
-
-    super.stop();
-  }
-
-  private void flushAll() {
-    ImmutableMultimap<String, ILoggingEvent> copy;
-    synchronized (queue) {
-      copy = ImmutableMultimap.copyOf(queue);
-      queue.clear();
+    @Override
+    protected void subAppend(ILoggingEvent event) {
+        String projectId = event.getMDCPropertyMap().get(SLF4J.KEY_PROJECT_ID);
+        if (projectId != null) {
+            synchronized (queue) {
+                queue.put(projectId, LoggingEventVO.build(event));
+            }
+        } else {
+            privilegedAppend(event);
+        }
     }
 
-    lock.lock();
-    try {
-      for (ILoggingEvent queued : copy.values()) {
-        privilegedAppend(queued);
-      }
-    } finally {
-      lock.unlock();
-    }
-  }
+    @Override
+    public void start() {
+        super.start();
 
-  protected void privilegedAppend(ILoggingEvent event) {
-    SLF4JPrintStream.enterPrivileged();
-    try {
-      super.subAppend(event);
-    } finally {
-      SLF4JPrintStream.leavePrivileged();
+        SLF4J.addListener(this);
     }
-  }
 
-  private void flush(String projectId) {
-    ImmutableList<ILoggingEvent> events;
-    synchronized (queue) {
-      events = ImmutableList.copyOf(queue.get(projectId));
-      queue.removeAll(projectId);
+    @Override
+    public void stop() {
+        SLF4J.removeListener(this);
+
+        flushAll();
+
+        super.stop();
     }
-    lock.lock();
-    try {
-      for (ILoggingEvent queued : events) {
-        privilegedAppend(queued);
-      }
-    } finally {
-      lock.unlock();
+
+    private void flushAll() {
+        ImmutableMultimap<String, ILoggingEvent> copy;
+        synchronized (queue) {
+            copy = ImmutableMultimap.copyOf(queue);
+            queue.clear();
+        }
+
+        lock.lock();
+        try {
+            for (ILoggingEvent queued : copy.values()) {
+                privilegedAppend(queued);
+            }
+        } finally {
+            lock.unlock();
+        }
     }
-  }
 
-  @Override
-  public void onSessionFinish(MavenSession session) {
-    flushAll();
-  }
+    protected void privilegedAppend(ILoggingEvent event) {
+        SLF4JPrintStream.enterPrivileged();
+        try {
+            super.subAppend(event);
+        } finally {
+            SLF4JPrintStream.leavePrivileged();
+        }
+    }
 
-  @Override
-  public void onProjectBuildFinish(MavenProject project) {
-    flush(project.getId());
-  }
+    private void flush(String projectId) {
+        ImmutableList<ILoggingEvent> events;
+        synchronized (queue) {
+            events = ImmutableList.copyOf(queue.get(projectId));
+            queue.removeAll(projectId);
+        }
+        lock.lock();
+        try {
+            for (ILoggingEvent queued : events) {
+                privilegedAppend(queued);
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public void onSessionFinish(MavenSession session) {
+        flushAll();
+    }
+
+    @Override
+    public void onProjectBuildFinish(MavenProject project) {
+        flush(project.getId());
+    }
 }

@@ -5,41 +5,40 @@
  */
 package io.takari.maven.logback;
 
-import java.io.File;
-
 import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
 import ch.qos.logback.core.rolling.TriggeringPolicy;
+import java.io.File;
 
 /**
  * {@link FixedWindowRollingPolicy} that triggers log file rollover on each build.
- * 
+ *
  * <pre>
  * {@code
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-      <file>build.log</file>
-      <rollingPolicy class="io.takari.maven.logback.BuildRollingPolicy">
-        <fileNamePattern>build-%i.log</fileNamePattern>
-        <maxIndex>2</maxIndex>
-      </rollingPolicy>
-      <encoder>
-        <pattern>%date %level %msg%n</pattern>
-      </encoder>
-    </appender>
+ * <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+ * <file>build.log</file>
+ * <rollingPolicy class="io.takari.maven.logback.BuildRollingPolicy">
+ * <fileNamePattern>build-%i.log</fileNamePattern>
+ * <maxIndex>2</maxIndex>
+ * </rollingPolicy>
+ * <encoder>
+ * <pattern>%date %level %msg%n</pattern>
+ * </encoder>
+ * </appender>
  * }
  */
 public class BuildRollingPolicy<E> extends FixedWindowRollingPolicy implements TriggeringPolicy<E> {
 
-  @Override
-  public boolean isTriggeringEvent(File activeFile, E event) {
-    return false;
-  }
-
-  @Override
-  public void start() {
-    boolean rollover = new File(getActiveFileName()).exists();
-    super.start();
-    if (rollover) {
-      rollover();
+    @Override
+    public boolean isTriggeringEvent(File activeFile, E event) {
+        return false;
     }
-  }
+
+    @Override
+    public void start() {
+        boolean rollover = new File(getActiveFileName()).exists();
+        super.start();
+        if (rollover) {
+            rollover();
+        }
+    }
 }

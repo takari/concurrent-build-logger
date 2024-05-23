@@ -12,7 +12,7 @@
   <parent>
     <groupId>io.takari</groupId>
     <artifactId>takari</artifactId>
-    <version>50</version>
+    <version>54</version>
   </parent>
 
   <groupId>io.takari.maven</groupId>
@@ -131,10 +131,10 @@
             <executions>
               <execution>
                 <id>maven-distro</id>
-                <phase>package</phase>
                 <goals>
                   <goal>provision</goal>
                 </goals>
+                <phase>package</phase>
                 <configuration>
                   <outputDirectory>${project.build.directory}/maven-distro</outputDirectory>
                 </configuration>
@@ -147,10 +147,10 @@
             <executions>
               <execution>
                 <id>integration-test</id>
-                <phase>integration-test</phase>
                 <goals>
                   <goal>test</goal>
                 </goals>
+                <phase>integration-test</phase>
                 <configuration>
                   <includes>**/*IT.java</includes>
                 </configuration>

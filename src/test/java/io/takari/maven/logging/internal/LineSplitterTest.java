@@ -7,69 +7,68 @@
  */
 package io.takari.maven.logging.internal;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
-
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 public class LineSplitterTest {
-  private final String STRING = "\u0442\u0435\u0441\u0442"; // "test" in Russian
-  private final Charset UTF8;
-  private final byte[] BYTES;
+    private final String STRING = "\u0442\u0435\u0441\u0442"; // "test" in Russian
+    private final Charset UTF8;
+    private final byte[] BYTES;
 
-  public LineSplitterTest() throws Exception {
-    this.UTF8 = StandardCharsets.UTF_8;
-    this.BYTES = STRING.getBytes(UTF8);
+    public LineSplitterTest() throws Exception {
+        this.UTF8 = StandardCharsets.UTF_8;
+        this.BYTES = STRING.getBytes(UTF8);
 
-    // sanity check
-    assertEquals(4, STRING.length());
-    assertEquals(8, BYTES.length);
-  }
-
-  @Test
-  public void testUTF8MultibyteReassembly() throws Exception {
-    LineSplitter adaptor = new LineSplitter(UTF8);
-
-    assertTrue(adaptor.split(BYTES, 0, 1).isEmpty());
-    assertTrue(adaptor.split(BYTES, 1, 6).isEmpty());
-    assertTrue(adaptor.split(BYTES, 7, 1).isEmpty());
-
-    assertEquals(STRING, adaptor.flush());
-  }
-
-  @Test
-  public void testBytesBufferOverflow() throws Exception {
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < LineSplitter.BYTES_SIZE * 2 + 10; i++) {
-      sb.append('a');
+        // sanity check
+        assertEquals(4, STRING.length());
+        assertEquals(8, BYTES.length);
     }
 
-    LineSplitter adaptor = new LineSplitter(UTF8);
-    byte[] bytes = sb.toString().getBytes(UTF8);
-    adaptor.split(bytes, 0, bytes.length);
+    @Test
+    public void testUTF8MultibyteReassembly() throws Exception {
+        LineSplitter adaptor = new LineSplitter(UTF8);
 
-    assertEquals(sb.toString(), adaptor.flush());
-  }
+        assertTrue(adaptor.split(BYTES, 0, 1).isEmpty());
+        assertTrue(adaptor.split(BYTES, 1, 6).isEmpty());
+        assertTrue(adaptor.split(BYTES, 7, 1).isEmpty());
 
-  @Test
-  public void testLineSplit() throws Exception {
-    LineSplitter adaptor = new LineSplitter(UTF8);
+        assertEquals(STRING, adaptor.flush());
+    }
 
-    assertEquals(Arrays.asList(""), adaptor.split("\n"));
-    assertEquals(Arrays.asList(""), adaptor.split("\r"));
-    assertEquals(Arrays.asList(""), adaptor.split("\r\n"));
-    assertEquals(Arrays.asList("", ""), adaptor.split("\r\r"));
+    @Test
+    public void testBytesBufferOverflow() throws Exception {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < LineSplitter.BYTES_SIZE * 2 + 10; i++) {
+            sb.append('a');
+        }
 
-    adaptor.split("a");
-    assertEquals("a", adaptor.flush());
+        LineSplitter adaptor = new LineSplitter(UTF8);
+        byte[] bytes = sb.toString().getBytes(UTF8);
+        adaptor.split(bytes, 0, bytes.length);
 
-    Collection<String> strings = adaptor.split("a\nb\rc\rd");
-    assertEquals(Arrays.asList("a", "b", "c"), strings);
-    assertEquals("d", adaptor.flush());
-  }
+        assertEquals(sb.toString(), adaptor.flush());
+    }
+
+    @Test
+    public void testLineSplit() throws Exception {
+        LineSplitter adaptor = new LineSplitter(UTF8);
+
+        assertEquals(Arrays.asList(""), adaptor.split("\n"));
+        assertEquals(Arrays.asList(""), adaptor.split("\r"));
+        assertEquals(Arrays.asList(""), adaptor.split("\r\n"));
+        assertEquals(Arrays.asList("", ""), adaptor.split("\r\r"));
+
+        adaptor.split("a");
+        assertEquals("a", adaptor.flush());
+
+        Collection<String> strings = adaptor.split("a\nb\rc\rd");
+        assertEquals(Arrays.asList("a", "b", "c"), strings);
+        assertEquals("d", adaptor.flush());
+    }
 }

@@ -7,208 +7,201 @@
  */
 package io.takari.maven.logback;
 
-
-import java.io.File;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-
-import org.apache.maven.execution.MavenSession;
-import org.apache.maven.lifecycle.Lifecycle;
-import org.apache.maven.plugin.MojoExecution;
-import org.apache.maven.project.MavenProject;
-
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEventVO;
 import ch.qos.logback.core.AppenderBase;
 import ch.qos.logback.core.FileAppender;
 import ch.qos.logback.core.util.StatusPrinter;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import io.takari.maven.logging.internal.SLF4J;
+import java.io.File;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.lifecycle.Lifecycle;
+import org.apache.maven.plugin.MojoExecution;
+import org.apache.maven.project.MavenProject;
 
 /**
  * This Maven-specific appender outputs project build log messages to per-project build.log files
  * <code>${project.build.directory}/build.log</code>.
  * <p>
  * Typical logback.xml configuration file
- * 
+ *
  * <pre>
  * {@code
-      <configuration>
-        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-          <encoder>
-            <pattern>[%level] %msg%n</pattern>
-          </encoder>
-        </appender>
-
-        <appender name="PROJECT" class="io.takari.maven.logback.ProjectBuildLogAppender">
-          <pattern>%date %level %msg%n</pattern>
-        </appender>
-
-        <root level="info">
-          <appender-ref ref="STDOUT" />
-          <appender-ref ref="PROJECT" />
-        </root>
-      </configuration>
+ * <configuration>
+ * <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+ * <encoder>
+ * <pattern>[%level] %msg%n</pattern>
+ * </encoder>
+ * </appender>
+ *
+ * <appender name="PROJECT" class="io.takari.maven.logback.ProjectBuildLogAppender">
+ * <pattern>%date %level %msg%n</pattern>
+ * </appender>
+ *
+ * <root level="info">
+ * <appender-ref ref="STDOUT" />
+ * <appender-ref ref="PROJECT" />
+ * </root>
+ * </configuration>
  * }
  * </pre>
  */
-public class ProjectBuildLogAppender extends AppenderBase<ILoggingEvent>
-    implements SLF4J.LifecycleListener {
+public class ProjectBuildLogAppender extends AppenderBase<ILoggingEvent> implements SLF4J.LifecycleListener {
 
-  private String fileName;
-  private String pattern;
+    private String fileName;
+    private String pattern;
 
-  private final Cache<String, FileAppender<ILoggingEvent>> appenders = CacheBuilder.newBuilder() //
-      .removalListener(new RemovalListener<String, FileAppender<ILoggingEvent>>() {
-        @Override
-        public void onRemoval(
-            RemovalNotification<String, FileAppender<ILoggingEvent>> notification) {
-          if (notification.getValue() != null) {
-            notification.getValue().stop();
-          }
+    private final Cache<String, FileAppender<ILoggingEvent>> appenders = CacheBuilder.newBuilder() //
+            .removalListener(new RemovalListener<String, FileAppender<ILoggingEvent>>() {
+                @Override
+                public void onRemoval(RemovalNotification<String, FileAppender<ILoggingEvent>> notification) {
+                    if (notification.getValue() != null) {
+                        notification.getValue().stop();
+                    }
+                }
+            }) //
+            .build();
+
+    private final Multimap<String, ILoggingEvent> queues = ArrayListMultimap.create();
+
+    @Override
+    public void start() {
+        if (fileName == null) {
+            addError("\"File\" property not set for appender named [" + name + "].");
+            return;
         }
-      }) //
-      .build();
 
-  private final Multimap<String, ILoggingEvent> queues = ArrayListMultimap.create();
+        if (pattern == null) {
+            addError("\"Pattern\" property not set for appender named [" + name + "].");
+            return;
+        }
 
-  @Override
-  public void start() {
-    if (fileName == null) {
-      addError("\"File\" property not set for appender named [" + name + "].");
-      return;
+        super.start();
+
+        SLF4J.addListener(this);
     }
 
-    if (pattern == null) {
-      addError("\"Pattern\" property not set for appender named [" + name + "].");
-      return;
+    @Override
+    protected void append(ILoggingEvent event) {
+        Map<String, String> mdc = event.getMDCPropertyMap();
+        if (mdc == null) {
+            return;
+        }
+
+        String projectId = mdc.get(SLF4J.KEY_PROJECT_ID);
+        if (projectId == null) {
+            return;
+        }
+
+        FileAppender<ILoggingEvent> appender = appenders.getIfPresent(projectId);
+
+        if (appender != null) {
+            appender.doAppend(event);
+        } else {
+            synchronized (queues) {
+                queues.put(projectId, LoggingEventVO.build(event));
+            }
+            return;
+        }
     }
 
-    super.start();
+    private FileAppender<ILoggingEvent> getOrCreateAppender(String projectId, String projectLogdir) {
+        long timestamp = System.currentTimeMillis();
 
-    SLF4J.addListener(this);
-  }
+        Callable<? extends FileAppender<ILoggingEvent>> valueLoader = () -> {
+            PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+            encoder.setContext(context);
+            encoder.setPattern(pattern);
+            encoder.start();
 
-  @Override
-  protected void append(ILoggingEvent event) {
-    Map<String, String> mdc = event.getMDCPropertyMap();
-    if (mdc == null) {
-      return;
+            FileAppender<ILoggingEvent> appender = new FileAppender<>();
+            appender.setContext(context);
+            appender.setName(projectId);
+            appender.setAppend(false);
+            appender.setEncoder(encoder);
+            appender.setFile(getLogfile(projectLogdir).getAbsolutePath());
+            appender.start();
+
+            if (!appender.isStarted()) {
+                StatusPrinter.printInCaseOfErrorsOrWarnings(context, timestamp);
+            }
+
+            return appender;
+        };
+
+        try {
+            return appenders.get(projectId, valueLoader);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e.getCause()); // can't really happen
+        }
     }
 
-    String projectId = mdc.get(SLF4J.KEY_PROJECT_ID);
-    if (projectId == null) {
-      return;
+    private void cleanOldLogFiles(MavenSession session) {
+        for (MavenProject project : session.getAllProjects()) {
+            File logfile = getLogfile(SLF4J.getLogdir(project));
+            logfile.delete();
+        }
     }
 
-    FileAppender<ILoggingEvent> appender = appenders.getIfPresent(projectId);
-
-    if (appender != null) {
-      appender.doAppend(event);
-    } else {
-      synchronized (queues) {
-        queues.put(projectId, LoggingEventVO.build(event));
-      }
-      return;
-    }
-  }
-
-  private FileAppender<ILoggingEvent> getOrCreateAppender(String projectId, String projectLogdir) {
-    long timestamp = System.currentTimeMillis();
-
-    Callable<? extends FileAppender<ILoggingEvent>> valueLoader = () -> {
-      PatternLayoutEncoder encoder = new PatternLayoutEncoder();
-      encoder.setContext(context);
-      encoder.setPattern(pattern);
-      encoder.start();
-
-      FileAppender<ILoggingEvent> appender = new FileAppender<>();
-      appender.setContext(context);
-      appender.setName(projectId);
-      appender.setAppend(false);
-      appender.setEncoder(encoder);
-      appender.setFile(getLogfile(projectLogdir).getAbsolutePath());
-      appender.start();
-
-      if (!appender.isStarted()) {
-        StatusPrinter.printInCaseOfErrorsOrWarnings(context, timestamp);
-      }
-
-      return appender;
-    };
-
-    try {
-      return appenders.get(projectId, valueLoader);
-    } catch (ExecutionException e) {
-      throw new RuntimeException(e.getCause()); // can't really happen
-    }
-  }
-
-  private void cleanOldLogFiles(MavenSession session) {
-    for (MavenProject project : session.getAllProjects()) {
-      File logfile = getLogfile(SLF4J.getLogdir(project));
-      logfile.delete();
-    }
-  }
-
-  private File getLogfile(String logdir) {
-    return new File(logdir, fileName);
-  }
-
-  public void setPattern(String pattern) {
-    this.pattern = pattern;
-  }
-
-  public void setFile(String fileName) {
-    this.fileName = fileName;
-  }
-
-  public void stop() {
-    SLF4J.removeListener(this);
-    appenders.invalidateAll();
-    appenders.cleanUp();
-    super.stop();
-  }
-
-  @Override
-  public void onSessionStart(MavenSession session) {
-    cleanOldLogFiles(session);
-  }
-
-  @Override
-  public void onProjectBuildFinish(MavenProject project) {
-    synchronized (queues) {
-      queues.removeAll(project.getId());
-    }
-    appenders.invalidate(project.getId());
-  }
-
-  @Override
-  public void onMojoExecutionStart(MavenProject project, Lifecycle lifecycle,
-      MojoExecution execution) {
-    if (lifecycle == null || "clean".equals(lifecycle.getId())) {
-      return;
+    private File getLogfile(String logdir) {
+        return new File(logdir, fileName);
     }
 
-    String projectId = project.getId();
-    String projectLogdir = SLF4J.getLogdir(project);
-
-    FileAppender<ILoggingEvent> appender = getOrCreateAppender(projectId, projectLogdir);
-
-    Collection<ILoggingEvent> events;
-    synchronized (queues) {
-      events = queues.removeAll(projectId);
+    public void setPattern(String pattern) {
+        this.pattern = pattern;
     }
 
-    events.forEach(e -> appender.doAppend(e));
-  }
+    public void setFile(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public void stop() {
+        SLF4J.removeListener(this);
+        appenders.invalidateAll();
+        appenders.cleanUp();
+        super.stop();
+    }
+
+    @Override
+    public void onSessionStart(MavenSession session) {
+        cleanOldLogFiles(session);
+    }
+
+    @Override
+    public void onProjectBuildFinish(MavenProject project) {
+        synchronized (queues) {
+            queues.removeAll(project.getId());
+        }
+        appenders.invalidate(project.getId());
+    }
+
+    @Override
+    public void onMojoExecutionStart(MavenProject project, Lifecycle lifecycle, MojoExecution execution) {
+        if (lifecycle == null || "clean".equals(lifecycle.getId())) {
+            return;
+        }
+
+        String projectId = project.getId();
+        String projectLogdir = SLF4J.getLogdir(project);
+
+        FileAppender<ILoggingEvent> appender = getOrCreateAppender(projectId, projectLogdir);
+
+        Collection<ILoggingEvent> events;
+        synchronized (queues) {
+            events = queues.removeAll(projectId);
+        }
+
+        events.forEach(e -> appender.doAppend(e));
+    }
 }

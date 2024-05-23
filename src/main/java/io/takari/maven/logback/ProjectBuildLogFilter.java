@@ -7,14 +7,12 @@
  */
 package io.takari.maven.logback;
 
-
-import java.util.Map;
-
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.spi.FilterReply;
 import io.takari.maven.logging.internal.SLF4J;
+import java.util.Map;
 
 /**
  * Filters events that have Maven project build MDC values. This filter is useful to suppress
@@ -26,36 +24,36 @@ import io.takari.maven.logging.internal.SLF4J;
  */
 public class ProjectBuildLogFilter extends Filter<ILoggingEvent> {
 
-  private FilterReply onMatch;
-  private Level passthroughThreshold;
+    private FilterReply onMatch;
+    private Level passthroughThreshold;
 
-  public void setOnMatch(FilterReply onMatch) {
-    this.onMatch = onMatch;
-  }
-
-  public void setPassthroughThreshold(Level threshold) {
-    this.passthroughThreshold = threshold;
-  }
-
-  @Override
-  public FilterReply decide(ILoggingEvent event) {
-    if (passthroughThreshold != null && event.getLevel().isGreaterOrEqual(passthroughThreshold)) {
-      return FilterReply.NEUTRAL;
+    public void setOnMatch(FilterReply onMatch) {
+        this.onMatch = onMatch;
     }
 
-    Map<String, String> mdcMap = event.getMDCPropertyMap();
-    if (mdcMap != null && mdcMap.containsKey(SLF4J.KEY_PROJECT_ID)) {
-      return onMatch;
+    public void setPassthroughThreshold(Level threshold) {
+        this.passthroughThreshold = threshold;
     }
-    return FilterReply.NEUTRAL;
-  }
 
-  @Override
-  public void start() {
-    if (onMatch == null) {
-      addError("onMatch action is not set, aborting");
-      return;
+    @Override
+    public FilterReply decide(ILoggingEvent event) {
+        if (passthroughThreshold != null && event.getLevel().isGreaterOrEqual(passthroughThreshold)) {
+            return FilterReply.NEUTRAL;
+        }
+
+        Map<String, String> mdcMap = event.getMDCPropertyMap();
+        if (mdcMap != null && mdcMap.containsKey(SLF4J.KEY_PROJECT_ID)) {
+            return onMatch;
+        }
+        return FilterReply.NEUTRAL;
     }
-    super.start();
-  }
+
+    @Override
+    public void start() {
+        if (onMatch == null) {
+            addError("onMatch action is not set, aborting");
+            return;
+        }
+        super.start();
+    }
 }

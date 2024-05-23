@@ -15,13 +15,13 @@ import io.takari.maven.logging.internal.SLF4JPrintStream;
  * console logging performance.
  */
 public class ConsoleAppender extends ch.qos.logback.core.ConsoleAppender<ILoggingEvent> {
-  @Override
-  protected void subAppend(ILoggingEvent event) {
-    SLF4JPrintStream.enterPrivileged();
-    try {
-      super.subAppend(event);
-    } finally {
-      SLF4JPrintStream.leavePrivileged();
+    @Override
+    protected void subAppend(ILoggingEvent event) {
+        SLF4JPrintStream.enterPrivileged();
+        try {
+            super.subAppend(event);
+        } finally {
+            SLF4JPrintStream.leavePrivileged();
+        }
     }
-  }
 }
