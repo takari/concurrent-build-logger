@@ -29,7 +29,7 @@
         <groupId>io.takari.maven.plugins</groupId>
         <artifactId>takari-lifecycle-plugin</artifactId>
         <extensions>true</extensions>
-        <version>2.0.9</version>
+        <version>2.1.5</version>
         <configuration>
           <proc>none</proc>
         </configuration>
