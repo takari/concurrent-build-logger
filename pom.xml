@@ -28,7 +28,7 @@
   </scm>
 
   <properties>
-    <mavenVersion>3.9.6</mavenVersion>
+    <mavenVersion>3.9.8</mavenVersion>
     <slf4jVersion>1.7.36</slf4jVersion>
     <logbackVersion>1.2.13</logbackVersion>
     <pluginTestingVersion>3.0.2</pluginTestingVersion>
